@@ -54,7 +54,7 @@ module Globalize
 
         after_save :save_translations!
         has_many :translations, :class_name  => translation_class.name,
-                                :foreign_key => class_name.foreign_key,
+                                :foreign_key => my_foreign_key,
                                 :dependent   => :delete_all,
                                 :extend      => HasManyExtensions
 
@@ -86,6 +86,13 @@ module Globalize
 
     module ClassMethods
       delegate :set_translation_table_name, :to => :translation_class
+
+      def my_foreign_key
+        # remove any prefix and/or suffix from the table name
+        my_class_name = table_name[table_name_prefix.length..-(table_name_suffix.length + 1)].camelize
+        my_class_name = my_class_name.singularize if pluralize_table_names
+        ActiveSupport::Inflector.foreign_key(my_class_name,true)
+      end
 
       def with_locale(locale)
         previous_locale, self.locale = self.locale, locale
