@@ -100,7 +100,7 @@ class TranslatesTest < ActiveSupport::TestCase
   test "fetch without a fallback" do
     Post.locale = :en
     post = Post.create :subject => "foo", :content => "bar"
-    assert_equal nil, post.globalize.fetch(:fr, :subject, allow_fallback=false)
-    assert_equal "foo", post.globalize.fetch(:en, :subject, allow_fallback=false)
+    assert_equal nil, post.globalize.fetch(:fr, :subject, :fr)
+    assert_equal "foo", post.globalize.fetch(:en, :subject, :fr)
   end
 end
