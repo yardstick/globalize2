@@ -1,6 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 require File.expand_path(File.dirname(__FILE__) + '/../data/models')
 
+require "i18n/backend/fallbacks"
+I18n::Backend::Simple.send(:include, I18n::Backend::Fallbacks)
+
 class TranslatesTest < ActiveSupport::TestCase
   def setup
     I18n.locale = nil
@@ -84,7 +87,7 @@ class TranslatesTest < ActiveSupport::TestCase
     post.subject = 'title'
     assert_equal 'title', post.subject
   end
-  
+
   test "find_by_xx records have writable attributes" do
     Post.create :subject => "change me"
     p = Post.find_by_subject("change me")
@@ -92,5 +95,12 @@ class TranslatesTest < ActiveSupport::TestCase
     assert_nothing_raised(ActiveRecord::ReadOnlyRecord) do
       p.save
     end
+  end
+
+  test "fetch without a fallback" do
+    Post.locale = :en
+    post = Post.create :subject => "foo", :content => "bar"
+    assert_equal nil, post.globalize.fetch(:fr, :subject, allow_fallback=false)
+    assert_equal "foo", post.globalize.fetch(:en, :subject, allow_fallback=false)
   end
 end

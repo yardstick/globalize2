@@ -11,10 +11,10 @@ module Globalize
         @stash = Attributes.new
       end
 
-      def fetch(locale, attr_name)
+      def fetch(locale, attr_name, allow_fallback = true)
         cache.contains?(locale, attr_name) ?
           cache.read(locale, attr_name) :
-          cache.write(locale, attr_name, fetch_attribute(locale, attr_name))
+          cache.write(locale, attr_name, fetch_attribute(locale, attr_name, allow_fallback))
       end
 
       def write(locale, attr_name, value)
@@ -50,11 +50,11 @@ module Globalize
             record.translations.by_locales(Globalize.fallbacks(locale))
         end
 
-        def fetch_attribute(locale, attr_name)
+        def fetch_attribute(locale, attr_name, allow_fallback = true)
           translations = fetch_translations(locale)
           value, requested_locale = nil, locale
-
-          Globalize.fallbacks(locale).each do |fallback|
+          locales = allow_fallback ? Globalize.fallbacks(locale) : Array(locale)
+          locales.each do |fallback|
             translation = translations.detect { |t| t.locale == fallback }
             value  = translation && translation.send(attr_name)
             locale = fallback && break if value
