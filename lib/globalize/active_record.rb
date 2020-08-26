@@ -32,12 +32,14 @@ module Globalize
     end
 
     module ActMacro
+      ThreadLocalKey = :globalize2_locale
+
       def locale
-        (defined?(@@locale) && @@locale)
+        Thread.current.key?(ThreadLocalKey) && Thread.current[ThreadLocalKey]
       end
 
       def locale=(locale)
-        @@locale = locale
+        Thread.current[ThreadLocalKey] = locale
       end
 
       def translates(*attr_names)
